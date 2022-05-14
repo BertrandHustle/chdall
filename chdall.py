@@ -44,8 +44,7 @@ def convert_chds():
         if not chd:
             print(f'.chd not created! errors: {chdman_cmd}')
         else:
-            print(chdman_cmd)
-        #TODO: find out if we can zip chds
+            print(f'created {filepath}.chd')
 
 
 if __name__ == '__main__':
