@@ -1,4 +1,3 @@
-import argparse
 import fnmatch
 import os
 import subprocess
