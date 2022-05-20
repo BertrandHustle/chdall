@@ -30,8 +30,10 @@ class TestChdAll(unittest.TestCase):
             elif f.endswith('.chd'):
                 os.remove(f)
 
-    def create_chds(self):
-        pass
+    def test_create_chds(self):
+        create_chds()
+        for d in test_bin_cue_dirs:
+            self.assertIsNotNone(find_pattern('*.chd', d))
 
     def test_move_chds(self):
         create_chds()
@@ -39,5 +41,5 @@ class TestChdAll(unittest.TestCase):
         parent_dir_chds = [f for f in os.listdir() if f.endswith('.chd')]
         self.assertTrue(len(parent_dir_chds) == 2)
 
-    def test_delete_chds(self):
+    def test_delete_bin_cues(self):
         pass

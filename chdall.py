@@ -17,7 +17,7 @@ def calc_percentage():
     pass
 
 
-def move_chds(remove: bool=False):
+def move_chds(remove: bool = False):
     for filepath in os.listdir():
         chd = find_pattern('*.chd', filepath)
         if chd:
@@ -83,4 +83,5 @@ if __name__ == '__main__':
     if not os.path.exists('chdman.exe'):
         raise FileNotFoundError('chdman.exe not found!')
     create_chds()
-    move_chds(arg_parser.delete)
+    if arg_parser.move:
+        move_chds(arg_parser.delete)
