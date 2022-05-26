@@ -1,4 +1,5 @@
 from shutil import copy, copytree, rmtree
+import os
 import pathlib
 import unittest
 
@@ -51,4 +52,9 @@ class TestChdAll(unittest.TestCase):
         self.assertTrue(len(parent_dir_chds) == 2)
 
     def test_delete_bin_cues(self):
-        pass
+        self._copy_test_chds()
+        move_chds(remove=True)
+        parent_dir_chds = [f for f in os.listdir() if f.endswith('.chd')]
+        self.assertTrue(len(parent_dir_chds) == 2)
+        for d in test_bin_cue_dirs:
+            self.assertFalse(os.path.exists(d))

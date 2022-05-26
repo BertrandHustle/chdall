@@ -70,6 +70,9 @@ def create_chds():
 
 
 if __name__ == '__main__':
+
+    initial_dir_size = os.path.getsize(os.getcwd())
+
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
         '-m', '--move', help='Move .chd files to parent folder after they are created', action='store_true'
@@ -85,3 +88,5 @@ if __name__ == '__main__':
     create_chds()
     if arg_parser.move:
         move_chds(arg_parser.delete)
+    if arg_parser.delete:
+        
