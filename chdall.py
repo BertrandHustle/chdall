@@ -13,8 +13,14 @@ def find_pattern(pattern, path):
                 return os.path.join(root, name)
 
 
-def calc_percentage():
-    pass
+def get_size_diff(bytes_bigger, bytes_smaller):
+    size_diff = bytes_bigger - bytes_smaller
+    byte_mapping = {1: 'kb', 2: 'mb', 3: 'gb'}
+    i = 0
+    while len(str(size_diff)) != 4:
+        size_diff = size_diff << 10
+        i += 1
+    return size_diff, byte_mapping
 
 
 def move_chds(remove: bool = False):
@@ -89,4 +95,6 @@ if __name__ == '__main__':
     if arg_parser.move:
         move_chds(arg_parser.delete)
     if arg_parser.delete:
-        
+        final_dir_size = os.path.getsize(os.getcwd())
+        dir_size_diff = initial_dir_size - final_dir_size
+        print()
