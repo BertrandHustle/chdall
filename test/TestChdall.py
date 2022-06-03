@@ -42,18 +42,6 @@ class TestChdAll(unittest.TestCase):
             source_chd = pathlib.PurePath(PROJECT_ROOT, 'test', 'test_chds', chd_prefix)
             copy(source_chd, os.path.join(d, chd_prefix))
 
-    def test_get_size_diff(self):
-        test_mapping = {
-            0: (1, 'b'),
-            1: (1023, 'kb'),
-            2: (1023000, 'mb'),
-            3: (1023334440, 'gb')
-        }
-        for i in range(4):
-            smaller = i
-            bigger = pow(1024, i)
-            print(get_size_diff(smaller, bigger))
-
     def test_create_chds(self):
         create_chds()
         for d in test_bin_cue_dirs:

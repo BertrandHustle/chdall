@@ -3,7 +3,19 @@ import os
 import subprocess
 from fnmatch import fnmatch
 from pathlib import Path
-from shutil import move, rmtree
+from shutil import copy, rmtree
+
+
+def get_size(path):
+    # https://stackoverflow.com/a/1392549/6237477
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            # skip if it is symbolic link
+            if not os.path.islink(fp):
+                total_size += os.path.getsize(fp)
+    return total_size
 
 
 def find_pattern(pattern, path):
@@ -28,7 +40,7 @@ def move_chds(remove: bool = False):
     for filepath in os.listdir():
         chd = find_pattern('*.chd', filepath)
         if chd:
-            move(chd, os.curdir)
+            copy(chd, os.curdir)
             if remove:
                 rmtree(filepath)
 
@@ -78,8 +90,6 @@ def create_chds():
 
 if __name__ == '__main__':
 
-    initial_dir_size = os.path.getsize(os.getcwd())
-
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
         '-m', '--move', help='Move .chd files to parent folder after they are created', action='store_true'
@@ -94,9 +104,15 @@ if __name__ == '__main__':
     if not os.path.exists('chdman.exe'):
         raise FileNotFoundError('chdman.exe not found!')
     create_chds()
-    if args.move:
-        move_chds(args.delete)
-    if args.delete:
-        final_dir_size = os.path.getsize(os.getcwd())
-        dir_size_percentage = (initial_dir_size - final_dir_size) * 100
-        print(f'{dir_size_percentage}% space saved!')
+    if args.delete and not args.move:
+        raise argparse.ArgumentError('cannot use --delete flag without --move!')
+    elif args.move and args.delete:
+        initial_dir_size = get_size(os.getcwd())
+        move_chds(remove=True)
+        final_dir_size = get_size(os.getcwd())
+        dir_size_percent_reduction = round(100 - ((final_dir_size/initial_dir_size) * 100), 2)
+        print(f'initial directory size: {round(initial_dir_size/pow(1024, 3), 2)}GB')
+        print(f'final directory size: {round(final_dir_size/pow(1024, 3), 2)}GB')
+        print(f'{dir_size_percent_reduction}% space saved!')
+    elif args.move:
+        move_chds()
