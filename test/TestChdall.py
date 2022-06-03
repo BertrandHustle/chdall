@@ -23,6 +23,8 @@ class TestChdAll(unittest.TestCase):
         self._remove_test_dirs_and_chds()
         os.chdir('..')
 
+    # specific setup/teardown methods
+
     @staticmethod
     def _remove_test_dirs_and_chds():
         for f in os.listdir():
@@ -39,6 +41,18 @@ class TestChdAll(unittest.TestCase):
             chd_prefix = cue_path.name.replace('.cue', '.chd')
             source_chd = pathlib.PurePath(PROJECT_ROOT, 'test', 'test_chds', chd_prefix)
             copy(source_chd, os.path.join(d, chd_prefix))
+
+    def test_get_size_diff(self):
+        test_mapping = {
+            0: (1, 'b'),
+            1: (1023, 'kb'),
+            2: (1023000, 'mb'),
+            3: (1023334440, 'gb')
+        }
+        for i in range(4):
+            smaller = i
+            bigger = pow(1024, i)
+            print(get_size_diff(smaller, bigger))
 
     def test_create_chds(self):
         create_chds()

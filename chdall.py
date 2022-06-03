@@ -2,15 +2,16 @@ import argparse
 import os
 import subprocess
 from fnmatch import fnmatch
+from pathlib import Path
 from shutil import move, rmtree
 
 
 def find_pattern(pattern, path):
-    # https://stackoverflow.com/a/1724723/6237477
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            if fnmatch(name, pattern):
-                return os.path.join(root, name)
+    if not path.startswith('.'):
+        files = Path(path).glob('*')
+        for file in [f for f in files if f.is_file()]:
+            if fnmatch(file, pattern):
+                return str(file.resolve())
 
 
 def get_size_diff(bytes_bigger, bytes_smaller):
@@ -88,13 +89,14 @@ if __name__ == '__main__':
         help='Delete folder with .bin/.cue after .chd file is created, must be used with --move/-m option',
         action='store_true'
     )
+    args = arg_parser.parse_args()
 
     if not os.path.exists('chdman.exe'):
         raise FileNotFoundError('chdman.exe not found!')
     create_chds()
-    if arg_parser.move:
-        move_chds(arg_parser.delete)
-    if arg_parser.delete:
+    if args.move:
+        move_chds(args.delete)
+    if args.delete:
         final_dir_size = os.path.getsize(os.getcwd())
-        dir_size_diff = initial_dir_size - final_dir_size
-        print()
+        dir_size_percentage = (initial_dir_size - final_dir_size) * 100
+        print(f'{dir_size_percentage}% space saved!')
