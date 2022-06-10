@@ -47,15 +47,15 @@ class TestChdAll(unittest.TestCase):
         for d in test_bin_cue_dirs:
             self.assertIsNotNone(find_pattern('*.chd', d))
 
-    def test_move_chds(self):
-        self._copy_test_chds()
-        move_chds()
+    def test_create_and_move_chds(self):
+        #self._copy_test_chds()
+        create_chds(move=True)
         parent_dir_chds = [f for f in os.listdir() if f.endswith('.chd')]
         self.assertTrue(len(parent_dir_chds) == 2)
 
-    def test_delete_bin_cues(self):
-        self._copy_test_chds()
-        move_chds(remove=True)
+    def test_create_chds_and_delete_bin_cues(self):
+        #self._copy_test_chds()
+        create_chds(move=True, delete=True)
         parent_dir_chds = [f for f in os.listdir() if f.endswith('.chd')]
         self.assertTrue(len(parent_dir_chds) == 2)
         for d in test_bin_cue_dirs:

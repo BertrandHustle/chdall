@@ -6,7 +6,7 @@ from pathlib import Path
 from shutil import copy, rmtree
 
 
-def get_size(path):
+def get_size(path: str):
     # https://stackoverflow.com/a/1392549/6237477
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(path):
@@ -18,7 +18,7 @@ def get_size(path):
     return total_size
 
 
-def find_pattern(pattern, path):
+def find_pattern(pattern: str, path: str):
     if not path.startswith('.'):
         files = Path(path).glob('*')
         for file in [f for f in files if f.is_file()]:
@@ -26,26 +26,7 @@ def find_pattern(pattern, path):
                 return str(file.resolve())
 
 
-def get_size_diff(bytes_bigger, bytes_smaller):
-    size_diff = bytes_bigger - bytes_smaller
-    byte_mapping = {1: 'kb', 2: 'mb', 3: 'gb'}
-    i = 0
-    while len(str(size_diff)) != 4:
-        size_diff = size_diff << 10
-        i += 1
-    return size_diff, byte_mapping
-
-
-def move_chds(remove: bool = False):
-    for filepath in os.listdir():
-        chd = find_pattern('*.chd', filepath)
-        if chd:
-            copy(chd, os.curdir)
-            if remove:
-                rmtree(filepath)
-
-
-def create_chds():
+def create_chds(move: bool = False, delete: bool = False):
     for filepath in os.listdir():
 
         bin = find_pattern('*.bin', filepath)
@@ -82,6 +63,10 @@ def create_chds():
         else:
             try:
                 verify_chd = subprocess.check_output(['chdman.exe', 'verify', '-i', chd], stderr=subprocess.STDOUT)
+                if move:
+                    copy(chd, os.curdir)
+                if delete:
+                    rmtree(filepath)
             except subprocess.CalledProcessError as cpe:
                 print(cpe.output)
                 continue
@@ -103,16 +88,15 @@ if __name__ == '__main__':
 
     if not os.path.exists('chdman.exe'):
         raise FileNotFoundError('chdman.exe not found!')
-    create_chds()
     if args.delete and not args.move:
         raise argparse.ArgumentError('cannot use --delete flag without --move!')
     elif args.move and args.delete:
         initial_dir_size = get_size(os.getcwd())
-        move_chds(remove=True)
+        create_chds(args.move, args.delete)
         final_dir_size = get_size(os.getcwd())
         dir_size_percent_reduction = round(100 - ((final_dir_size/initial_dir_size) * 100), 2)
         print(f'initial directory size: {round(initial_dir_size/pow(1024, 3), 2)}GB')
         print(f'final directory size: {round(final_dir_size/pow(1024, 3), 2)}GB')
         print(f'{dir_size_percent_reduction}% space saved!')
-    elif args.move:
-        move_chds()
+    else:
+        create_chds(args.move, args.delete)
