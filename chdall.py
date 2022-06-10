@@ -63,7 +63,7 @@ def create_chds(move: bool = False, delete: bool = False):
             continue
         else:
             try:
-                verify_chd = subprocess.check_output(['chdman', 'verify', '-i', chd], stderr=subprocess.STDOUT)
+                verify_chd = subprocess.call(['chdman', 'verify', '-i', chd], stderr=subprocess.STDOUT)
                 if move:
                     copy(chd, os.curdir)
                 if delete:

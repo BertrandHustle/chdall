@@ -1,4 +1,6 @@
-from shutil import copytree, rmtree
+from contextlib import suppress
+from pathlib import Path
+from shutil import copy, copytree, rmtree
 import os
 import unittest
 
@@ -10,27 +12,28 @@ test_bin_cue_dirs = ['Ace_Combat_2__USA_', 'Advanced_V.G._2__Japan_']
 
 class TestChdAll(unittest.TestCase):
     def setUp(self):
+        # remove existing test dirs/files
+        with suppress(FileNotFoundError):
+            rmtree('test_dir')
+        # create paths
+        Path('test_dir/deeper_test_dir').mkdir(parents=True)
+        project_root = Path(PROJECT_ROOT)
+        # copy test files into appropriate test dirs
+        copy('chdman.exe', 'test_dir')
+        copytree(
+            project_root / Path('Ace_Combat_2__USA_'),
+            Path('test_dir') / Path('Ace_Combat_2__USA_')
+        )
+        copytree(
+            project_root / Path('Advanced_V.G._2__Japan_'),
+            Path('test_dir/deeper_test_dir') / Path('Advanced_V.G._2__Japan_')
+        )
+        # move into test dir
         os.chdir('test_dir')
-        self._remove_test_dirs_and_chds()
-        for d in test_bin_cue_dirs:
-            copytree(
-                os.path.join(PROJECT_ROOT, d),
-                os.path.join(os.getcwd(), d)
-            )
 
     def tearDown(self):
-        self._remove_test_dirs_and_chds()
         os.chdir('..')
-
-    # specific setup/teardown methods
-
-    @staticmethod
-    def _remove_test_dirs_and_chds():
-        for f in os.listdir():
-            if f in test_bin_cue_dirs:
-                rmtree(f)
-            elif f.endswith('.chd'):
-                os.remove(f)
+        rmtree('test_dir')
 
     def test_create_chds(self):
         create_chds()
