@@ -6,5 +6,7 @@ USAGE:
 2. `python chdall.py`
 
 FLAGS:
+
 --move/-m: Move .chd files to parent folder after they are created
+
 --delete/-d: Delete folder with .bin/.cue after .chd file is created, must be used with --move/-m option
