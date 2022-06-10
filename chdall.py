@@ -2,6 +2,7 @@ import argparse
 import os
 import subprocess
 from fnmatch import fnmatch
+from glob import glob
 from pathlib import Path
 from shutil import copy, rmtree
 
@@ -49,7 +50,7 @@ def create_chds(move: bool = False, delete: bool = False):
         # execute chdman
         try:
             chdman_cmd = subprocess.check_output(
-                ['chdman.exe', 'createcd', '-i', cue, '-o', f'{cue_game_name}.chd'], stderr=subprocess.STDOUT
+                ['chdman', 'createcd', '-i', cue, '-o', f'{cue_game_name}.chd'], stderr=subprocess.STDOUT
             )
         except subprocess.CalledProcessError as cpe:
             print(cpe.output)
@@ -62,7 +63,7 @@ def create_chds(move: bool = False, delete: bool = False):
             continue
         else:
             try:
-                verify_chd = subprocess.check_output(['chdman.exe', 'verify', '-i', chd], stderr=subprocess.STDOUT)
+                verify_chd = subprocess.check_output(['chdman', 'verify', '-i', chd], stderr=subprocess.STDOUT)
                 if move:
                     copy(chd, os.curdir)
                 if delete:
@@ -86,8 +87,8 @@ if __name__ == '__main__':
     )
     args = arg_parser.parse_args()
 
-    if not os.path.exists('chdman.exe'):
-        raise FileNotFoundError('chdman.exe not found!')
+    if not glob('chdman*'):
+        raise FileNotFoundError('chdman not found!')
     if args.delete and not args.move:
         raise argparse.ArgumentError('cannot use --delete flag without --move!')
     elif args.move and args.delete:
