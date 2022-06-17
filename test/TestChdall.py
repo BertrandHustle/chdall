@@ -36,15 +36,12 @@ class TestChdAll(unittest.TestCase):
         rmtree('test_dir')
 
     def test_get_all_bin_cue_dirs_from_path(self):
-        self.assertEqual(
-            [Path(p).name for p in test_bin_cue_dirs],
-            [p.name for p in get_all_bin_cue_dirs_from_path()]
-        )
+        self.assertEqual(test_bin_cue_dirs, [p.name for p in get_all_bin_cue_dirs_from_path()])
 
     def test_create_chds(self):
         create_chds()
-        for d in test_bin_cue_dirs:
-            self.assertIsNotNone(find_pattern('*.chd', d))
+        self.assertIsNotNone(find_pattern('*.chd', Path('Ace_Combat_2__USA_')))
+        self.assertIsNotNone(find_pattern('*.chd', Path('deeper_test_dir/Advanced_V.G._2__Japan_')))
 
     def test_create_and_move_chds(self):
         create_chds(move=True)
@@ -55,5 +52,5 @@ class TestChdAll(unittest.TestCase):
         create_chds(move=True, delete=True)
         parent_dir_chds = [f for f in os.listdir() if f.endswith('.chd')]
         self.assertTrue(len(parent_dir_chds) == 2)
-        for d in test_bin_cue_dirs:
-            self.assertFalse(os.path.exists(d))
+        self.assertFalse(Path('Ace_Combat_2__USA_').exists())
+        self.assertFalse(Path('deeper_test_dir/Advanced_V.G._2__Japan_').exists())

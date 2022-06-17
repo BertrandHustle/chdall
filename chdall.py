@@ -19,15 +19,15 @@ def get_size(path: str):
     return total_size
 
 
-def get_all_bin_cue_dirs_from_path(path: str = os.getcwd(), bin_cue_paths: list[Path] = []) -> list[Path]:
+def get_all_bin_cue_dirs_from_path(path: str = os.getcwd(), bin_cue_paths: set[Path] = []) -> list[Path]:
     # returns list of Path objects for every dir and subdir in given path
     bin_cue_paths = bin_cue_paths
     for p in Path(path).iterdir():
         if p.is_dir() and not p.name.startswith('.'):
-            if find_pattern('*.bin', p) and find_pattern('*.cue', p):
+            if find_pattern('*.bin', p) and find_pattern('*.cue', p) and p not in bin_cue_paths:
                 bin_cue_paths.append(p)
             get_all_bin_cue_dirs_from_path(str(p), bin_cue_paths)
-    return bin_cue_paths
+    return set(bin_cue_paths)
 
 
 def find_pattern(pattern: str, path: Path):
@@ -39,23 +39,23 @@ def find_pattern(pattern: str, path: Path):
 
 
 def create_chds(move: bool = False, delete: bool = False):
-    for filepath in os.listdir():
+    for filepath in get_all_bin_cue_dirs_from_path():
 
         bin = find_pattern('*.bin', filepath)
         cue = find_pattern('*.cue', filepath)
 
         # skip files that aren't a dir and hidden files
-        if not os.path.isdir(filepath) or filepath.startswith('.'):
+        if not filepath.is_dir() or filepath.name.startswith('.'):
             continue
 
         # error handling
         if not cue or not bin:
-            print(f'.cue and .bin not found in {filepath}!')
+            print(f'.cue and .bin not found in {filepath.name}!')
             continue
         else:
             cue_game_name = cue.split('.cue')[0]
         if find_pattern('*.chd', filepath):
-            print(f'{filepath}.chd already exists!')
+            print(f'{filepath.name}.chd already exists!')
             continue
 
         # execute chdman
