@@ -19,11 +19,22 @@ def get_size(path: str):
     return total_size
 
 
-def find_pattern(pattern: str, path: str):
-    if not path.startswith('.'):
-        files = Path(path).glob('*')
+def get_all_bin_cue_dirs_from_path(path: str = os.getcwd(), bin_cue_paths: list[Path] = []) -> list[Path]:
+    # returns list of Path objects for every dir and subdir in given path
+    bin_cue_paths = bin_cue_paths
+    for p in Path(path).iterdir():
+        if p.is_dir() and not p.name.startswith('.'):
+            if find_pattern('*.bin', p) and find_pattern('*.cue', p):
+                bin_cue_paths.append(p)
+            get_all_bin_cue_dirs_from_path(str(p), bin_cue_paths)
+    return bin_cue_paths
+
+
+def find_pattern(pattern: str, path: Path):
+    if not path.name.startswith('.'):
+        files = path.glob('*')
         for file in [f for f in files if f.is_file()]:
-            if fnmatch(file, pattern):
+            if fnmatch(str(file), pattern):
                 return str(file.resolve())
 
 

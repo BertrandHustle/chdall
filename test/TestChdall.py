@@ -35,6 +35,12 @@ class TestChdAll(unittest.TestCase):
         os.chdir('..')
         rmtree('test_dir')
 
+    def test_get_all_bin_cue_dirs_from_path(self):
+        self.assertEqual(
+            [Path(p).name for p in test_bin_cue_dirs],
+            [p.name for p in get_all_bin_cue_dirs_from_path()]
+        )
+
     def test_create_chds(self):
         create_chds()
         for d in test_bin_cue_dirs:
