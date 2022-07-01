@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
-        '-d', '--directory', help='select target directory', action='store'
+        '-d', '--directory', help='Specify target directory with .bin/.cues to be converted', action='store'
     )
     arg_parser.add_argument(
         '-m', '--move', help='Move .chd files to parent folder after they are created', action='store_true'
