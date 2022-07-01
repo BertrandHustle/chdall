@@ -19,7 +19,7 @@ def get_size(path: str):
     return total_size
 
 
-def get_all_bin_cue_dirs_from_path(path: str = os.getcwd(), bin_cue_paths: set[Path] = []) -> list[Path]:
+def get_all_bin_cue_dirs_from_path(path: str, bin_cue_paths: list[Path] = []) -> set[Path]:
     # returns list of Path objects for every dir and subdir in given path
     bin_cue_paths = bin_cue_paths
     for p in Path(path).iterdir():
@@ -38,8 +38,8 @@ def find_pattern(pattern: str, path: Path):
                 return str(file.resolve())
 
 
-def create_chds(move: bool = False, delete: bool = False):
-    for filepath in get_all_bin_cue_dirs_from_path():
+def create_chds(path: str, move: bool = False, remove: bool = False):
+    for filepath in get_all_bin_cue_dirs_from_path(path):
 
         bin = find_pattern('*.bin', filepath)
         cue = find_pattern('*.cue', filepath)
@@ -76,8 +76,8 @@ def create_chds(move: bool = False, delete: bool = False):
             try:
                 verify_chd = subprocess.call(['chdman', 'verify', '-i', chd], stderr=subprocess.STDOUT)
                 if move:
-                    copy(chd, os.curdir)
-                if delete:
+                    copy(chd, path)
+                if remove:
                     rmtree(filepath)
             except subprocess.CalledProcessError as cpe:
                 print(cpe.output)
@@ -89,26 +89,30 @@ if __name__ == '__main__':
 
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument(
+        '-d', '--directory', help='select target directory', action='store'
+    )
+    arg_parser.add_argument(
         '-m', '--move', help='Move .chd files to parent folder after they are created', action='store_true'
     )
     arg_parser.add_argument(
-        '-d', '--delete',
-        help='Delete folder with .bin/.cue after .chd file is created, must be used with --move/-m option',
+        '-r', '--remove',
+        help='Remove folder with .bin/.cue after .chd file is created, must be used with --move/-m option',
         action='store_true'
     )
     args = arg_parser.parse_args()
+    target_dir = args.directory or os.getcwd()
 
     if not glob('chdman*'):
         raise FileNotFoundError('chdman not found!')
-    if args.delete and not args.move:
-        raise argparse.ArgumentError('cannot use --delete flag without --move!')
-    elif args.move and args.delete:
-        initial_dir_size = get_size(os.getcwd())
-        create_chds(args.move, args.delete)
-        final_dir_size = get_size(os.getcwd())
+    if args.remove and not args.move:
+        raise argparse.ArgumentError('cannot use --remove flag without --move!')
+    elif args.move and args.remove:
+        initial_dir_size = get_size(target_dir)
+        create_chds(target_dir, args.move, args.remove)
+        final_dir_size = get_size(target_dir)
         dir_size_percent_reduction = round(100 - ((final_dir_size/initial_dir_size) * 100), 2)
         print(f'initial directory size: {round(initial_dir_size/pow(1024, 3), 2)}GB')
         print(f'final directory size: {round(final_dir_size/pow(1024, 3), 2)}GB')
         print(f'{dir_size_percent_reduction}% space saved!')
     else:
-        create_chds(args.move, args.delete)
+        create_chds(args.move, args.remove)
